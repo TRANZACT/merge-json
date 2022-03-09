@@ -1,0 +1,41 @@
+name: Build (MergeJson)
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TEST_DIR: ./test
+      TEST_PROJ: MergeJson.Tests.csproj
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.0.x'
+        include-prerelease: false
+
+    - name: Execute Tests
+      continue-on-error: true
+      run: dotnet test ${{ env.TEST_DIR }}/${{ env.TEST_PROJ }} --logger "trx" --configuration Release --results-directory .
+
+    - name: Process trx reports
+      if: ${{ github.event_name == 'pull_request' }}
+      id: process-trx
+      uses: im-open/process-dotnet-test-results@v1.0.3
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        base-directory: '.'                           # Default: .
+        create-status-check: true                     # Default: true
+        create-pr-comment: true                       # Default: true
+        ignore-test-failures: false                   # Default: false
+        timezone: 'america/new_york'                  # Default: UTC
+
+    - name: Fail if there were test problems
+      if: steps.process-trx.outputs.test-outcome == 'Failed'
+      run: |
+        echo "There were test failures."
+        exit 1

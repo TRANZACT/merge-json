@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MergeJson", "src\MergeJson.csproj", "{F68B0DF7-1FC1-4754-B2E1-1D23DFF05CB0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MergeJson.Tests", "test\MergeJson.Tests.csproj", "{02287413-642A-4CCB-8E26-566EFB1A77B1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F68B0DF7-1FC1-4754-B2E1-1D23DFF05CB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F68B0DF7-1FC1-4754-B2E1-1D23DFF05CB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F68B0DF7-1FC1-4754-B2E1-1D23DFF05CB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F68B0DF7-1FC1-4754-B2E1-1D23DFF05CB0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02287413-642A-4CCB-8E26-566EFB1A77B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02287413-642A-4CCB-8E26-566EFB1A77B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02287413-642A-4CCB-8E26-566EFB1A77B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02287413-642A-4CCB-8E26-566EFB1A77B1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
