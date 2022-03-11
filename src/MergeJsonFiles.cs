@@ -16,7 +16,7 @@ public class MergeJsonFiles
         AllowTrailingCommas = true,
         WriteIndented = true,
         Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-        ReadCommentHandling = JsonCommentHandling.Allow,
+        ReadCommentHandling = JsonCommentHandling.Skip,
     };
 
     public MergeJsonFiles(string sourceFilePath, string targetFilePath)
