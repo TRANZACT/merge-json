@@ -5,6 +5,20 @@ namespace MergeJson;
 
 public class MergeJsonFiles
 {
+    private static readonly JsonDocumentOptions _jsonDocumentOptions = new() 
+    { 
+        AllowTrailingCommas = true,
+        CommentHandling = JsonCommentHandling.Skip
+    };
+
+    private static readonly JsonSerializerOptions _jsonSerializerOptions = new()
+    {
+        AllowTrailingCommas = true,
+        WriteIndented = true,
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        ReadCommentHandling = JsonCommentHandling.Skip,
+    };
+
     public MergeJsonFiles(string sourceFilePath, string targetFilePath)
     {
         SourceFile = sourceFilePath;
@@ -32,35 +46,28 @@ public class MergeJsonFiles
 
     public bool Execute()
     {
-        string? sourceFileText, targetFileText;
+        string sourceFileText, targetFileText;
         JsonDocument? sourceDoc, targetDoc;
 
         // Load files.
         try
         {
-            Console.WriteLine($"Loading {nameof(SourceFile)} file from path: {SourceFile}");
-            sourceFileText = System.IO.File.ReadAllText(SourceFile);
-            Console.WriteLine($"Loading {nameof(TargetFile)} file from path: {TargetFile}");
-            targetFileText = System.IO.File.ReadAllText(TargetFile);
+            sourceFileText = LoadSourceFile();
+            targetFileText = LoadTargetFile();
         }
-        catch (Exception ex)
+        catch
         {
-            Console.Error.WriteLine("Error loading Source or Target file from provided path.", ex.Message);
             return false;
         }
 
         try
         {
-            var jsonOptions = new JsonDocumentOptions() { AllowTrailingCommas = true };
-
-            Console.WriteLine($"Parsing json for {nameof(SourceFile)}");
-            sourceDoc = JsonDocument.Parse(sourceFileText, jsonOptions);
-            Console.WriteLine($"Parsing json for {nameof(TargetFile)}");
-            targetDoc = JsonDocument.Parse(targetFileText, jsonOptions);
+            sourceDoc = ParseSourceFile(sourceFileText);
+            targetDoc = ParseTargetFile(targetFileText);
         }
-        catch (Exception ex)
+        catch
         {
-            Console.Error.WriteLine($"Error parsing Source or Target file as {nameof(JsonDocument)}.", ex.Message);
+            
             return false;
         }
 
@@ -76,16 +83,9 @@ public class MergeJsonFiles
             return false;
         }
 
-        // save target
         try
         {
-            targetFileText = mergedObj.ToJsonString(new JsonSerializerOptions()
-            {
-                AllowTrailingCommas = true,
-                WriteIndented = true,
-                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-            });
-            System.IO.File.WriteAllText(TargetFile, targetFileText);
+            targetFileText = SaveTargetFile(mergedObj);
         }
         catch (Exception ex)
         {
@@ -96,6 +96,74 @@ public class MergeJsonFiles
         Console.WriteLine($"Success Merging json files and updating {nameof(TargetFile)}.");
         return true;
     }
+
+    private string SaveTargetFile(JsonObject mergedObj)
+    {
+        string targetFileText = mergedObj.ToJsonString(_jsonSerializerOptions);
+        File.WriteAllText(TargetFile, targetFileText);
+        return targetFileText;
+    }
+
+    private static JsonDocument ParseTargetFile(string targetFileText)
+    {
+        try
+        {
+            Console.WriteLine($"Parsing json for {nameof(TargetFile)}");
+            JsonDocument targetDoc = JsonDocument.Parse(targetFileText, _jsonDocumentOptions);
+            return targetDoc;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error parsing Target file as {nameof(JsonDocument)}.", ex.Message);
+            throw;
+        }
+    }
+
+    private static JsonDocument ParseSourceFile(string sourceFileText)
+    {
+        try
+        {
+            Console.WriteLine($"Parsing json for {nameof(SourceFile)}");
+            JsonDocument sourceDoc = JsonDocument.Parse(sourceFileText, _jsonDocumentOptions);
+            return sourceDoc;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error parsing Source file as {nameof(JsonDocument)}.", ex.Message);
+            throw;
+        }
+    }
+
+    private string LoadTargetFile()
+    {
+        try
+        {
+            Console.WriteLine($"Loading {nameof(TargetFile)} file from path: {TargetFile}");
+            string targetFileText = File.ReadAllText(TargetFile);
+            return targetFileText;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine("Error loading Target file from provided path.", ex.Message);
+            throw;
+        }
+    }
+
+    private string LoadSourceFile()
+    {
+        try
+        {
+            Console.WriteLine($"Loading {nameof(SourceFile)} file from path: {SourceFile}");
+            string sourceFileText = File.ReadAllText(SourceFile);
+            return sourceFileText;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine("Error loading Source file from provided path.", ex.Message);
+            throw;
+        }
+    }
+
 
     /// <summary>
     /// Recursive function to merge Json objects
