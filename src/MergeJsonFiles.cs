@@ -1,10 +1,13 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 
 namespace MergeJson;
 
 public class MergeJsonFiles
 {
+    private static readonly Regex removeLineEndings = new(@"[\r\n]+");
+
     private static readonly JsonDocumentOptions _jsonDocumentOptions = new() 
     { 
         AllowTrailingCommas = true,
@@ -226,8 +229,10 @@ public class MergeJsonFiles
         // for each item in source, if not found append to temp array
         foreach (var item in sourceArray.EnumerateArray())
         {
-            string strRaw = item.GetRawText().Trim().ToLower();
-            if (finalArray.Any(x => x.ToLower() == strRaw))
+            string strRaw = item.GetRawText();
+            string strRawClean = item.GetRawText().Trim().ToLower();
+            strRawClean = removeLineEndings.Replace(strRawClean, string.Empty);
+            if (finalArray.Any(x => removeLineEndings.Replace(x, string.Empty).Trim().ToLower() == strRawClean))
             {
                 continue;
             }
