@@ -16,7 +16,7 @@ public class MergeJsonTests
     private static readonly Faker _faker = new();
 
     [Theory]
-    [MemberData(nameof(MergeJsonData))]
+    [MemberData(nameof(WrappedJsonData))]
     public async Task MergeTest(IJsonData left, IJsonData right)
     {
         string leftPath = await CreateJsonFileAsync(left);
@@ -94,6 +94,8 @@ public class MergeJsonTests
                 File.Delete(path);
         }
     }
+
+    public static IEnumerable<object[]> WrappedJsonData => MergeJsonData;
 
     public static IEnumerable<IJsonData[]> MergeJsonData => 
         new List<IJsonData[]>
