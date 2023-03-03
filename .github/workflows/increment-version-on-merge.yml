@@ -40,7 +40,7 @@ jobs:
     if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
     needs: increment-version
     env:
-        DOTNET_VER: "6.0.x"
+        DOTNET_VER: "7.0.x"
         DOTNET_PREVIEW: false
         SRC_DIR: "./src"
         SRC_PROJ: "MergeJson.csproj"
@@ -58,7 +58,9 @@ jobs:
       run: echo "VERSION=${{ needs.increment-version.outputs.NEXT_VERSION }}" >> $GITHUB_ENV
     - uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '6.0.x'
+        dotnet-version: |
+          7.0.x
+          6.0.x
         include-prerelease: $DOTNET_PREVIEW
     - name: Build
       run: dotnet build $SRC_DIR/$SRC_PROJ --configuration Release /p:Version=${VERSION}
