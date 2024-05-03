@@ -42,7 +42,7 @@ jobs:
     if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'develop'
     needs: increment-version
     env:
-        DOTNET_VER: "7.0.x"
+        DOTNET_VER: "8.0.x"
         DOTNET_PREVIEW: false
         SRC_DIR: "./src"
         SRC_PROJ: "MergeJson.csproj"
@@ -63,6 +63,7 @@ jobs:
         dotnet-version: |
           7.0.x
           6.0.x
+          8.0.x
         include-prerelease: $DOTNET_PREVIEW
     - name: Build
       run: dotnet build $SRC_DIR/$SRC_PROJ --configuration Release /p:Version=${VERSION}
