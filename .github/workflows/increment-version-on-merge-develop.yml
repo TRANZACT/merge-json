@@ -1,15 +1,15 @@
 
 # Workflow Code: AngryGoose_v2    DO NOT REMOVE
 
-name: Release (Main)
+name: Release (Develop)
 on:
   pull_request:
     types: [closed]
     branches:
-    - main
+    - develop
 jobs:
   increment-version:
-    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'develop'
     runs-on: ubuntu-latest
     outputs:
       NEXT_VERSION: ${{ steps.set-version-output.outputs.NEXT_VERSION }}
@@ -24,6 +24,8 @@ jobs:
         name: Increment the version
         uses: im-open/git-version-lite@v2.0.0
         with:
+          calculate-prerelease-version: true
+          branch-name: ${{ github.base_ref }}
           create-ref: true
           github-token: ${{ secrets.GITHUB_TOKEN }}
           default-release-type: major
@@ -31,13 +33,13 @@ jobs:
       - id: set-version-output
         name: Set Version Output
         run: |
-          export VERSION="$(echo ${{ steps.get-version.outputs.NEXT_VERSION }} | cut -d v -f2)"
+          export VERSION="$(echo ${{ steps.get-version.outputs.NEXT_VERSION }} | cut -c 2-)"
           echo '::set-output name=NEXT_VERSION::'$VERSION
 
       - run: echo "${{ steps.set-version-output.outputs.NEXT_VERSION }}"
 
   release:
-    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'develop'
     needs: increment-version
     env:
         DOTNET_VER: "7.0.x"
