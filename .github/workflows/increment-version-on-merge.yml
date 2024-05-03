@@ -7,66 +7,14 @@ on:
     types: [closed]
     branches:
     - main
+    - develop
 jobs:
-  increment-version:
-    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
-    runs-on: ubuntu-latest
-    outputs:
-      NEXT_VERSION: ${{ steps.set-version-output.outputs.NEXT_VERSION }}
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
-      # See https://github.com/im-open/git-version for more details around how to increment major/minor/patch through commit messages
-      - id: get-version
-        name: Increment the version
-        uses: im-open/git-version-lite@v2.0.0
-        with:
-          create-ref: true
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          default-release-type: major
-
-      - id: set-version-output
-        name: Set Version Output
-        run: |
-          export VERSION="$(echo ${{ steps.get-version.outputs.NEXT_VERSION }} | cut -d v -f2)"
-          echo '::set-output name=NEXT_VERSION::'$VERSION
-
-      - run: echo "${{ steps.set-version-output.outputs.NEXT_VERSION }}"
-
-  release:
-    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
-    needs: increment-version
-    env:
-        DOTNET_VER: "8.0.x"
-        DOTNET_PREVIEW: false
-        SRC_DIR: "./src"
-        SRC_PROJ: "MergeJson.csproj"
-        PACKAGE_NAME: "MergeJson"
-        PACKAGE_SOURCE: https://api.nuget.org/v3/index.json
-        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-    - name: Set VERSION variable from tag
-      run: echo "VERSION=${{ needs.increment-version.outputs.NEXT_VERSION }}" >> $GITHUB_ENV
-    - uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: |
-          6.0.x
-          7.0.x
-          8.0.x
-        include-prerelease: $DOTNET_PREVIEW
-    - name: Build
-      run: dotnet build $SRC_DIR/$SRC_PROJ --configuration Release /p:Version=${VERSION}
-    - name: Pack
-      run: dotnet pack $SRC_DIR/$SRC_PROJ --configuration Release /p:Version=${VERSION} --output .
-    - name: Push to GitHub Feed
-      run: dotnet nuget push $PACKAGE_NAME.${VERSION}.nupkg --source $PACKAGE_SOURCE --api-key ${NUGET_API_KEY}
-
+  publish-core:
+    needs: [publish-assets]
+    uses: TRANZACT/TzDigital.GitHub.Workflows/.github/workflows/increment-version-on-merge.yml@main
+    with:
+      src-dir: './${{ github.event.repository.name }}'
+      project: ${{ github.event.repository.name }}
+      package-name: ${{ github.event.repository.name }}
+      dotnet-version: '8.0.x'
+      version: ${{ needs.publish-assets.outputs.version }}
