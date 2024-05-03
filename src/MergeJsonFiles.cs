@@ -4,12 +4,19 @@ using System.Text.RegularExpressions;
 
 namespace MergeJson;
 
-public class MergeJsonFiles
+public partial class MergeJsonFiles
 {
-    private static readonly Regex removeLineEndings = new(@"[\r\n]+");
+#if NET7_0_OR_GREATER
+    [GeneratedRegex(@"[\r\n]+")]
+    private static partial Regex removeLineEndingsRegexGenerated();
 
-    private static readonly JsonDocumentOptions _jsonDocumentOptions = new() 
-    { 
+    private static readonly Regex removeLineEndingsRegex = removeLineEndingsRegexGenerated();
+#else
+    private static readonly Regex removeLineEndingsRegex = new(@"[\r\n]+");
+#endif
+
+    private static readonly JsonDocumentOptions _jsonDocumentOptions = new()
+    {
         AllowTrailingCommas = true,
         CommentHandling = JsonCommentHandling.Skip
     };
@@ -70,7 +77,6 @@ public class MergeJsonFiles
         }
         catch
         {
-            
             return false;
         }
 
@@ -97,6 +103,7 @@ public class MergeJsonFiles
         }
 
         Console.WriteLine($"Success Merging json files and updating {nameof(TargetFile)}.");
+
         return true;
     }
 
@@ -231,8 +238,8 @@ public class MergeJsonFiles
         {
             string strRaw = item.GetRawText();
             string strRawClean = item.GetRawText().Trim().ToLower();
-            strRawClean = removeLineEndings.Replace(strRawClean, string.Empty);
-            if (finalArray.Any(x => removeLineEndings.Replace(x, string.Empty).Trim().ToLower() == strRawClean))
+            strRawClean = removeLineEndingsRegex.Replace(strRawClean, string.Empty);
+            if (finalArray.Any(x => removeLineEndingsRegex.Replace(x, string.Empty).Trim().ToLower() == strRawClean))
             {
                 continue;
             }
